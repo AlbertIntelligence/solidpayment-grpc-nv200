@@ -1,0 +1,32 @@
+syntax = "proto3";
+package nv200;
+
+service NV200Service {
+  rpc StartNV2000 (startNV200Request) returns (startNV200Response) {}
+  rpc DisableNV200 (DisableNV200Request) returns (DisableNV200Response) {}
+  rpc DisconnectNV200 (DisconnectNV200Request) returns (DisconnectNV200Response) {}
+  rpc MonitorEvent (MonitorEventRequest) returns (MonitorEventResponse) {}
+}
+
+message startNV200Request {}
+
+message startNV200Response {
+  string deviceStatus = 1;
+}
+
+message DisableNV200Request {}
+
+message DisableNV200Response {}
+
+message DisconnectNV200Request {}
+
+message DisconnectNV200Response {}
+
+message MonitorEventRequest {}
+
+message MonitorEventResponse {
+  string readNote = 1;
+}
+
+
+
