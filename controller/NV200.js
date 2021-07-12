@@ -1,13 +1,19 @@
-const sspLib = require('encrypted-smiley-secure-protocol');
+const SspLib = require('../nv200Driver/index');
 
+let serialPortConfig = {
+    baudrate: 9600, // default: 9600
+    databits: 8, // default: 8
+    stopbits: 2, // default: 2
+    parity: 'none' // default: 'none'
+  };
 
-let eSSP = new sspLib({
+let eSSP = new SspLib({
     id: 0x00,
-    debug: false,
-    timeout: 3000,
-    fixedKey: '0123456701234567'
+    debug: false, // default: false
+    timeout: 5000, // default: 3000
+    encryptAllCommand: true, // default: true
+    fixedKey: '0123456701234567' // default: '0123456701234567'
 });
-
 
 exports.StartNV2000 = async (ctx) => {
     try {
@@ -23,6 +29,11 @@ exports.StartNV2000 = async (ctx) => {
                     console.log('SERIAL NUMBER:', result.info.serial_number)
                     return;
                 })
+                .then(() => eSSP.command('GET_FIRMWARE_VERSION'))
+                .then(result => {
+                    console.log('FIRMWARE VERSION:', result.info.version)
+                    return;
+                })
                 .then(() => eSSP.enable())
                 .then(result => {
                     if (result.status == 'OK') {
@@ -36,7 +47,7 @@ exports.StartNV2000 = async (ctx) => {
         })
         try {
         
-            await eSSP.open(process.env.COM_PORT);
+            await eSSP.open(process.env.COM_PORT,serialPortConfig);
         }
         catch(e) {
             console.log('Error happend opening eSSP  ', e.message)

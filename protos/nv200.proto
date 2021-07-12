@@ -1,5 +1,5 @@
 syntax = "proto3";
-package nv200;
+
 
 service NV200Service {
   rpc StartNV2000 (startNV200Request) returns (startNV200Response) {}

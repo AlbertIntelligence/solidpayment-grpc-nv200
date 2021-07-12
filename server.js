@@ -1,7 +1,7 @@
 require("dotenv").config();
-const auth = require("@malijs/metadata-auth");
 const path = require("path");
-const Mali = require("mali");
+const grpc = require('@grpc/grpc-js');
+var protoLoader = require('@grpc/proto-loader');
 
 const {
     StartNV2000,
@@ -10,32 +10,33 @@ const {
     MonitorEvent
 } = require("./controller/NV200");
 
-
 const PROTO_PATH = path.resolve(__dirname, "./protos/nv200.proto");
-const HOSTPORT = "localhost:" + process.env.PORT;
+const HOSTPORT = "0.0.0.0:" + process.env.PORT;
 
-let app;
+const options = {
+    keepCase: true,
+    longs: String,
+    enums: String,
+    defaults: true,
+    oneofs: true,
+};
+var packageDefinition = protoLoader.loadSync(PROTO_PATH, options);
+const newsProto = grpc.loadPackageDefinition(packageDefinition);
+
 
 function main() {
-  app = new Mali(PROTO_PATH, "NV200Service");
-    app.use({
-        StartNV2000,
-        DisableNV200,
-        DisconnectNV200,
-        MonitorEvent
+    const server = new grpc.Server();
+    server.addService(newsProto.NV200Service.service, {
+        StartNV2000:StartNV2000,
+        DisableNV200:DisableNV200,
+        DisconnectNV200:DisconnectNV200,
+        MonitorEvent:MonitorEvent
     });
-  app.start(HOSTPORT);
-  console.log(`NV200 GRPC service running @ ${HOSTPORT}`);
-}
-/*
-async function shutdown(err) {
-  if (err) console.error(err);
-  await app.close();
-  process.exit();
+    server.bindAsync(HOSTPORT, grpc.ServerCredentials.createInsecure(),
+        () => {
+            server.start();
+            console.log(`NV200 GRPC service running @ ${HOSTPORT}`);
+        })
 }
 
-process.on("uncaughtException", shutdown);
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
-*/
 main();
