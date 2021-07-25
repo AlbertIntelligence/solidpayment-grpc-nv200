@@ -15,7 +15,8 @@ RUN npm i chalk
 RUN npm install 
 
 ENV PORT=50055
-ENV COM_PORT=/dev/ttyACM0
+ENV COM_PORT=/dev/ttyUSB0
+ENV NV200_DEBUG=false
 
 EXPOSE 50055
 CMD ["npm","run","start","--bind","0.0.0.0"]

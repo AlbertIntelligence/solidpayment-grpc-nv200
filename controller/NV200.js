@@ -1,4 +1,5 @@
 const SspLib = require('../nv200Driver/index');
+let channels = [{ value: 0, country_code: 'CAD' }];
 
 let serialPortConfig = {
     baudrate: 9600, // default: 9600
@@ -9,7 +10,7 @@ let serialPortConfig = {
 
 let eSSP = new SspLib({
     id: 0x00,
-    debug: false, // default: false
+    debug: process.env.NV200_DEBUG, // default: false
     timeout: 5000, // default: 3000
     encryptAllCommand: true, // default: true
     fixedKey: '0123456701234567' // default: '0123456701234567'
@@ -17,47 +18,60 @@ let eSSP = new SspLib({
 
 exports.StartNV2000 = async (ctx) => {
     try {
-     
-        await eSSP.on('OPEN', () => {
-            console.log('open');
-    
-            eSSP.command('SYNC')
-                .then(() => eSSP.command('HOST_PROTOCOL_VERSION', { version: 6 }))
-                .then(() => eSSP.initEncryption())
-                .then(() => eSSP.command('GET_SERIAL_NUMBER'))
-                .then(result => {
-                    console.log('SERIAL NUMBER:', result.info.serial_number)
-                    return;
-                })
-                .then(() => eSSP.command('GET_FIRMWARE_VERSION'))
-                .then(result => {
-                    console.log('FIRMWARE VERSION:', result.info.version)
-                    return;
-                })
-                .then(() => eSSP.enable())
-                .then(result => {
-                    if (result.status == 'OK') {
-                        console.log('Device is active');
-                        ctx.res = {
-                            deviceStatus: 'Device is active',
-                        };
-                    }
-                    return;
-                })
+        eSSP.open('/dev/ttyUSB0', serialPortConfig)
+        .then(() => eSSP.command('SYNC'))
+        .then(() => eSSP.command('HOST_PROTOCOL_VERSION', { version: 6 }))
+        .then(() => eSSP.initEncryption())
+        .then(() => eSSP.command('GET_SERIAL_NUMBER'))
+        .then(result => {
+          console.log('SERIAL NUMBER:', result.info.serial_number);
+          return;
         })
-        try {
-        
-            await eSSP.open(process.env.COM_PORT,serialPortConfig);
-        }
-        catch(e) {
-            console.log('Error happend opening eSSP  ', e.message)
-           }
+        .then(() => eSSP.command('SETUP_REQUEST'))
+        .then(result => {
+          for (let i = 0; i < result.info.channel_value.length; i++) {
+            channels[result.info.channel_value[i]] = {
+              value: result.info.expanded_channel_value[i],
+              country_code: result.info.expanded_channel_country_code[i]
+            };
+          }
+          return;
+        })
+        .then(() => eSSP.enable())
+            .then(() => {
+                ctx.res = {
+                    ready: true,
+                };
+            console.log('GO!!!');
+            
+        })
+        .catch(error => {
+            console.log(error);
+            ctx.res = {
+                ready: false,
+            };
+        });
+      
+      
+      eSSP.command('SET_CHANNEL_INHIBITS', {
+        channels: [1, 1, 1, 1, 1, 1, 1, 1] // channel 1-3 enable
+      });
+      
     }
 
     catch(e) {
         console.log('Error happend While starting eSSP ', e.message)
        }
 };
+
+exports.EnableNV200 = async () => {
+    try {
+        eSSP.enable()
+    }
+    catch(e) {
+        console.log('Error happend While enabling eSSP ', e.message)
+       }
+}
 
 exports.DisableNV200 = async () => {
     try {
@@ -80,6 +94,7 @@ exports.DisconnectNV200 = async () => {
 
 
 exports.MonitorEvent = async (ctx) => {
+
 
     try {
         eSSP.on('READ_NOTE', result => {

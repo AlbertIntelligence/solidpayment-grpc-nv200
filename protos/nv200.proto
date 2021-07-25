@@ -3,6 +3,7 @@ syntax = "proto3";
 
 service NV200Service {
   rpc StartNV2000 (startNV200Request) returns (startNV200Response) {}
+  rpc EnableNV200 (EnableNV200Request) returns (EnableNV200Response) {}
   rpc DisableNV200 (DisableNV200Request) returns (DisableNV200Response) {}
   rpc DisconnectNV200 (DisconnectNV200Request) returns (DisconnectNV200Response) {}
   rpc MonitorEvent (MonitorEventRequest) returns (MonitorEventResponse) {}
@@ -13,6 +14,10 @@ message startNV200Request {}
 message startNV200Response {
   string deviceStatus = 1;
 }
+
+message EnableNV200Request {}
+
+message EnableNV200Response {}
 
 message DisableNV200Request {}
 

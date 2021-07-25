@@ -5,6 +5,7 @@ var protoLoader = require('@grpc/proto-loader');
 
 const {
     StartNV2000,
+    EnableNV200,
     DisableNV200,
     DisconnectNV200,
     MonitorEvent
@@ -28,6 +29,7 @@ function main() {
     const server = new grpc.Server();
     server.addService(newsProto.NV200Service.service, {
         StartNV2000:StartNV2000,
+        EnableNV200:EnableNV200,
         DisableNV200:DisableNV200,
         DisconnectNV200:DisconnectNV200,
         MonitorEvent:MonitorEvent
