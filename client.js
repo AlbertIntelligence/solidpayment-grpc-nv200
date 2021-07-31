@@ -24,14 +24,14 @@ const client = new NV200Service(
 client.StartNV2000({}, (error, deviceStatus) => {
     if (!error) throw error
       console.log(deviceStatus);
-  });*/
+  });*
   /*
   client.EnableNV200({}, (error, deviceStatus) => {
     if (!error) throw error
       console.log(deviceStatus);
-  });
-  /*
+  });*/
+  
 client.DisableNV200({}, (error, deviceStatus) => {
     if (!error) throw error
     console.log(deviceStatus);
-});*/
+});

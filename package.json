@@ -1,5 +1,5 @@
 {
-  "name": "piggycoin-exchange-grpc-nv200",
+  "name": "solidpayment-grpc-nv200",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
